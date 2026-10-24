@@ -26,7 +26,7 @@ Database terdiri dari lima tabel yang saling berhubungan:
 ## Entity Relationship Diagram (ERD)
 ERD menggambarkan hubungan antartabel melalui primary key dan foreign key.
 
-Gambar ERD dapat dilihat pada file `erd.png` di repositori ini.
+![ERD Sistem Bimbingan Jurusan](erd.png)
 
 ## Dokumentasi Endpoint API
 
