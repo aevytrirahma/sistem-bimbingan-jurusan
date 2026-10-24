@@ -2,10 +2,12 @@
 from flask import Blueprint, request, jsonify
 from app import db
 from app.models.siswa import Siswa
+from app.models.siswa_minat import SiswaMinat
 
 siswa_bp = Blueprint("siswa", __name__)
 
 
+# GET semua data siswa
 @siswa_bp.route("/siswa", methods=["GET"])
 def get_siswa():
     data = Siswa.query.all()
@@ -21,6 +23,7 @@ def get_siswa():
     ]), 200
 
 
+# POST tambah siswa
 @siswa_bp.route("/siswa", methods=["POST"])
 def tambah_siswa():
     data = request.get_json(silent=True)
@@ -47,6 +50,7 @@ def tambah_siswa():
     }), 201
 
 
+# PUT ubah data siswa
 @siswa_bp.route("/siswa/<int:id>", methods=["PUT"])
 def ubah_siswa(id):
     siswa = db.session.get(Siswa, id)
@@ -69,9 +73,12 @@ def ubah_siswa(id):
 
     db.session.commit()
 
-    return jsonify({"message": "Data siswa berhasil diubah"}), 200
+    return jsonify({
+        "message": "Data siswa berhasil diubah"
+    }), 200
 
 
+# DELETE hapus siswa
 @siswa_bp.route("/siswa/<int:id>", methods=["DELETE"])
 def hapus_siswa(id):
     siswa = db.session.get(Siswa, id)
@@ -79,17 +86,34 @@ def hapus_siswa(id):
     if siswa is None:
         return jsonify({"error": "Siswa tidak ditemukan"}), 404
 
-    db.session.delete(siswa)
-    db.session.commit()
+    try:
+        # Hapus relasi minat siswa terlebih dahulu
+        SiswaMinat.query.filter_by(siswa_id=id).delete()
 
-    return jsonify({"message": "Data siswa berhasil dihapus"}), 200
+        # Hapus data siswa
+        db.session.delete(siswa)
+        db.session.commit()
 
+        return jsonify({
+            "message": "Data siswa berhasil dihapus"
+        }), 200
+
+    except Exception:
+        db.session.rollback()
+        return jsonify({
+            "error": "Data siswa gagal dihapus"
+        }), 500
+
+
+# GET detail siswa berdasarkan ID
 @siswa_bp.route("/siswa/<int:id>", methods=["GET"])
 def detail_siswa(id):
     siswa = db.session.get(Siswa, id)
 
     if siswa is None:
-        return jsonify({"error": "Siswa tidak ditemukan"}), 404
+        return jsonify({
+            "error": "Siswa tidak ditemukan"
+        }), 404
 
     return jsonify({
         "id": siswa.id,
