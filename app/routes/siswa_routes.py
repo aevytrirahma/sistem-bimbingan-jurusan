@@ -83,3 +83,17 @@ def hapus_siswa(id):
     db.session.commit()
 
     return jsonify({"message": "Data siswa berhasil dihapus"}), 200
+
+@siswa_bp.route("/siswa/<int:id>", methods=["GET"])
+def detail_siswa(id):
+    siswa = db.session.get(Siswa, id)
+
+    if siswa is None:
+        return jsonify({"error": "Siswa tidak ditemukan"}), 404
+
+    return jsonify({
+        "id": siswa.id,
+        "nama": siswa.nama,
+        "kelas": siswa.kelas,
+        "asal_sekolah": siswa.asal_sekolah
+    }), 200
